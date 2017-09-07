@@ -81,16 +81,16 @@ def create_gsmtip_files_from_hammonia(file_to_read):
         # создадим Surfer файлы для записи
         # нужно для проверки преобразований и считывания данных
         file_to_write_zwind_surfer = open(
-            '{}_surfer'.format(filename_zwind), 'a'
+            '{}_surfer.dat'.format(filename_zwind), 'a'
         )
         file_to_write_vwind_surfer = open(
-            '{}_surfer'.format(filename_vwind), 'a'
+            '{}_surfer.dat'.format(filename_vwind), 'a'
         )
         file_to_write_temperature_surfer = open(
-            '{}_surfer'.format(filename_temperature), 'a'
+            '{}_surfer.dat'.format(filename_temperature), 'a'
         )
         file_to_write_density_surfer = open(
-            '{}_surfer'.format(filename_density), 'a'
+            '{}_surfer.dat'.format(filename_density), 'a'
         )
         # запишем человекопонятный заголовок в Surfer файлы
         surfer_header = 'longitude   latitude   value\n'
@@ -182,16 +182,16 @@ def create_gsmtip_files_from_hammonia(file_to_read):
                     file_to_write_vwind.write(new_block_or_string)
 
                 # запишем текущие координаты в Surfer файлы
-                surfer_coordinates = '\n{}   {} '.format(longitude, latitude)
+                surfer_coordinates = '{}   {}  '.format(longitude, latitude)
                 file_to_write_zwind_surfer.write(surfer_coordinates)
                 file_to_write_vwind_surfer.write(surfer_coordinates)
                 file_to_write_temperature_surfer.write(surfer_coordinates)
                 file_to_write_density_surfer.write(surfer_coordinates)
                 # запишем данные в Surfer файлы
-                file_to_write_zwind_surfer.write(zwind_data)
-                file_to_write_vwind_surfer.write(vwind_data)
-                file_to_write_temperature_surfer.write(temperature_data)
-                file_to_write_density_surfer.write(density_data)
+                file_to_write_zwind_surfer.write(zwind_data + '\n')
+                file_to_write_vwind_surfer.write(vwind_data + '\n')
+                file_to_write_temperature_surfer.write(temperature_data + '\n')
+                file_to_write_density_surfer.write(density_data + '\n')
 
 
 def create_directories():

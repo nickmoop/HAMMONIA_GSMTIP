@@ -173,15 +173,17 @@ def create_dimensions_in_netcdf(gsm_tip_data_dict, filename):
         time_keys = list(gsm_tip_data_dict[parameter_name].keys())
         altitude_keys = list(
             gsm_tip_data_dict[parameter_name][time_keys[0]].keys())
-        latitude_keys = list(gsm_tip_data_dict[parameter_name][time_keys[0]][
-                                 altitude_keys[0]].keys())
+        latitude_keys = list(
+            gsm_tip_data_dict[parameter_name][time_keys[0]][altitude_keys[0]].keys()
+        )
         longitude_keys = list(
-            gsm_tip_data_dict[parameter_name][time_keys[0]][altitude_keys[0]][
-                latitude_keys[0]].keys())
+            gsm_tip_data_dict[parameter_name][time_keys[0]][altitude_keys[0]][latitude_keys[0]].keys()
+        )
         break
 
-    converted_keys = convert_keys(time_keys, altitude_keys, latitude_keys,
-                                  longitude_keys)
+    converted_keys = convert_keys(
+        time_keys, altitude_keys, latitude_keys, longitude_keys
+    )
     file_netCDF = Dataset(filename, 'w', format='NETCDF4')
     all_keys = ['lon', 'lat', 'height', 'time']
     for key in all_keys:
@@ -224,7 +226,7 @@ def convert_keys(time_keys, altitude_keys, latitude_keys, longitude_keys):
         converted_keys['height']['all'].append(80)
 
     for key in latitude_keys:
-        value = key * 5 - 90
+        value = -(key * 5) + 90
         converted_keys['lat'][value] = key
         converted_keys['lat']['all'].append(value)
 
@@ -263,7 +265,7 @@ def create_gsmtip_data_dict_from_gsmtip_files(gsmtip_folder):
                 if 'UT' in line:
                     splitted_line = line.split()
                     hour_UT = int(splitted_line[1])
-                    latitude_i = int(splitted_line[3])
+                    latitude_i = int(splitted_line[3]) - 1
                     longitude_i = 0
                     days_delta = base_days_delta + timedelta(hours=hour_UT)
                     gsmtip_datetime = START_DATE_GSMTIP + days_delta
@@ -312,7 +314,7 @@ def calculate_mm_air_from_air_density(air_density, temperature):
 # если запускаем этот файл.py а не импортируем из него методы
 if __name__ == '__main__':
     # адрес до папки с данными GSMTIP
-    gsmtip_folder = '/home/nick/code/python/netCDF/GSMTIP/'
+    gsmtip_folder = 'GSMTIP/'
 
     # создадим на основе данных GSMTIP netcdf-файлы, такого формата,
     # чтобы использовать их в модели HAMMONIA
