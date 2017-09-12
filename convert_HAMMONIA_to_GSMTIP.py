@@ -14,6 +14,8 @@ GAS_CONSTANT = 8.3144598
 START_DATE_HAMMONIA = datetime.strptime(
     '2007-12-31 00:00:00', "%Y-%m-%d %H:%M:%S"
 )
+#
+NEAREST_CELLS_TABLE = {}
 
 
 def create_gsmtip_files_from_hammonia(file_to_read):
@@ -266,8 +268,8 @@ def bilinear_interpolation(
     # найдем индексы, ближайших к текущим коррдинатам,
     # широты и долготы в старой сетке,
     # для построения "квадрата" вокруг текущих координат
-    latitude_indexes = find_near_indexes(latitude_cells, latitude)
-    longitude_indexes = find_near_indexes(longitude_cells, longitude)
+    latitude_indexes = find_near_indexes(latitude_cells, latitude, 'latitude')
+    longitude_indexes = find_near_indexes(longitude_cells, longitude, 'longitude')
 
     # простая замена, если текущие координаты выходят за границы сетки HAMMONIA
     if not latitude_indexes or not longitude_indexes:
@@ -312,7 +314,48 @@ def bilinear_interpolation(
     return converted_value
 
 
-def find_near_indexes(old_cells, coordinate):
+def create_indexes_table(old_cells, TMP):
+
+    if TMP == 'latitude':
+        latitudes_list = list(range(-90, 95, 5))
+        latitudes_list.reverse()
+
+        NEAREST_CELLS_TABLE['latitude'] = {}
+        for coordinate in latitudes_list:
+
+            for index in range(0, len(old_cells) - 1):
+
+                if (old_cells[index] <= coordinate <= old_cells[index + 1] or
+                    old_cells[index] >= coordinate >= old_cells[index + 1]
+                ):
+                    NEAREST_CELLS_TABLE['latitude'][coordinate] = (
+                        index, index + 1,
+                    )
+
+            if coordinate not in NEAREST_CELLS_TABLE['latitude'].keys():
+
+                NEAREST_CELLS_TABLE['latitude'][coordinate] = None
+
+    elif TMP == 'longitude':
+        longitudes_list = range(0, 360, 5)
+        NEAREST_CELLS_TABLE['longitude'] = {}
+        for coordinate in longitudes_list:
+
+            for index in range(0, len(old_cells) - 1):
+
+                if (old_cells[index] <= coordinate <= old_cells[index + 1] or
+                    old_cells[index] >= coordinate >= old_cells[index + 1]
+                ):
+                    NEAREST_CELLS_TABLE['longitude'][coordinate] = (
+                        index, index + 1,
+                    )
+
+            if coordinate not in NEAREST_CELLS_TABLE['longitude'].keys():
+
+                NEAREST_CELLS_TABLE['longitude'][coordinate] = None
+
+
+def find_near_indexes(old_cells, coordinate, TMP):
     """
     Метод для нахождения индексов ближайших координат для указанной сетки и
     координат. Например есть сетка [0, 5, 10, 15] и координаты 7. Ближайшими
@@ -321,22 +364,15 @@ def find_near_indexes(old_cells, coordinate):
     билинейной интерполяции и преобразования шага сетки в произвольный
 
     :param old_cells: список координат исходной сетки
-    :param coordinate: координаты для которых хоти найти ближайшие индексы
+    :param coordinate: координаты для которых хотим найти ближайшие индексы
+    :param TMP:
     :return: ближайшие индексы для указанных координат для исходной сетки
     """
 
-    # итерируемся по всем индексам кроме последнего (см. ниже)
-    for index in range(0, len(old_cells) - 1):
+    if TMP not in NEAREST_CELLS_TABLE.keys():
+        create_indexes_table(old_cells, TMP)
 
-        # если значение координат находится в интервале
-        # между текущим и следующим значением сетки, вернем индексы
-        if (old_cells[index] <= coordinate <= old_cells[index + 1] or
-                        old_cells[index] >= coordinate >= old_cells[index + 1]
-        ):
-            return index, index + 1
-
-    # вернем None, если текущие координаты не вписываются в исходную сетку
-    return None
+    return NEAREST_CELLS_TABLE[TMP][coordinate]
 
 
 # если запускаем этот файл.py а не импортируем из него методы
